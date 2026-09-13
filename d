@@ -27,93 +27,223 @@ end
 if not hitRemote then warn("No hit remote found!") end
 print("Hit remote: " .. (hitRemote and hitRemote.Name or "NONE"))
 
--- Main Draggable Black Frame
+-- Compact Mobile-Friendly GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "CombinedAuto"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = false
 ScreenGui.Parent = CoreGui
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 280, 0, 420)
-mainFrame.Position = UDim2.new(0.5, -140, 0.5, -210)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)  -- Black theme
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 220, 0, 196)
+mainFrame.Position = UDim2.new(0.5, -110, 0.5, -98)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
 mainFrame.Parent = ScreenGui
 
--- Draggable
-local dragging, dragStart, startPos
-mainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = mainFrame.Position
-    end
-end)
-mainFrame.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - dragStart
-        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 10)
+mainCorner.Parent = mainFrame
 
--- Title
+-- Header / drag area
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0, 32)
+header.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+header.BorderSizePixel = 0
+header.Active = true
+header.Parent = mainFrame
+
+local headerCorner = Instance.new("UICorner")
+headerCorner.CornerRadius = UDim.new(0, 10)
+headerCorner.Parent = header
+
+local headerFix = Instance.new("Frame")
+headerFix.Size = UDim2.new(1, 0, 0, 10)
+headerFix.Position = UDim2.new(0, 0, 1, -10)
+headerFix.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+headerFix.BorderSizePixel = 0
+headerFix.Parent = header
+
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 30)
-title.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-title.Text = "🔥 FIREBALL + HIT AUTO"
-title.TextColor3 = Color3.new(1,1,1)
-title.TextScaled = true
+title.Size = UDim2.new(1, -72, 1, 0)
+title.Position = UDim2.new(0, 8, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "🔥 FIRE + HIT"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
 title.Font = Enum.Font.GothamBold
-title.Parent = mainFrame
+title.Parent = header
 
--- Fireball Stats
+-- Hide button
+local hideBtn = Instance.new("TextButton")
+hideBtn.Size = UDim2.new(0, 28, 0, 24)
+hideBtn.Position = UDim2.new(1, -62, 0, 4)
+hideBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+hideBtn.TextColor3 = Color3.new(1, 1, 1)
+hideBtn.Text = "—"
+hideBtn.TextSize = 18
+hideBtn.Font = Enum.Font.GothamBold
+hideBtn.AutoButtonColor = true
+hideBtn.Parent = header
+
+local hideCorner = Instance.new("UICorner")
+hideCorner.CornerRadius = UDim.new(0, 6)
+hideCorner.Parent = hideBtn
+
+-- Small close button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 28, 0, 24)
+closeBtn.Position = UDim2.new(1, -32, 0, 4)
+closeBtn.BackgroundColor3 = Color3.fromRGB(180, 45, 45)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Text = "×"
+closeBtn.TextSize = 18
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.AutoButtonColor = true
+closeBtn.Parent = header
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 6)
+closeCorner.Parent = closeBtn
+
+-- Fireball stats
 local statsFireball = Instance.new("TextLabel")
-statsFireball.Size = UDim2.new(1, -20, 0, 35)
-statsFireball.Position = UDim2.new(0, 10, 0, 45)
+statsFireball.Size = UDim2.new(1, -12, 0, 27)
+statsFireball.Position = UDim2.new(0, 6, 0, 38)
 statsFireball.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-statsFireball.TextColor3 = Color3.fromRGB(255, 165, 0)  -- Orange for fireball
-statsFireball.TextScaled = true
+statsFireball.TextColor3 = Color3.fromRGB(255, 165, 0)
+statsFireball.TextSize = 11
 statsFireball.Font = Enum.Font.GothamSemibold
-statsFireball.Text = "Fireballs: 0 | Est: 1317 ms | Rate: 0.76 hps"
+statsFireball.Text = "Fire: 0 | 1317 ms | 0.76/s"
 statsFireball.Parent = mainFrame
 
--- Hit Stats
+local fireCorner = Instance.new("UICorner")
+fireCorner.CornerRadius = UDim.new(0, 6)
+fireCorner.Parent = statsFireball
+
+-- Hit stats
 local statsHit = Instance.new("TextLabel")
-statsHit.Size = UDim2.new(1, -20, 0, 35)
-statsHit.Position = UDim2.new(0, 10, 0, 90)
+statsHit.Size = UDim2.new(1, -12, 0, 27)
+statsHit.Position = UDim2.new(0, 6, 0, 69)
 statsHit.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-statsHit.TextColor3 = Color3.fromRGB(100, 255, 100)  -- Green for hit
-statsHit.TextScaled = true
+statsHit.TextColor3 = Color3.fromRGB(100, 255, 100)
+statsHit.TextSize = 11
 statsHit.Font = Enum.Font.GothamSemibold
-statsHit.Text = "Hits: 0 | Est: 616 ms | Rate: 0.00 hps"
+statsHit.Text = "Hits: 0 | 616 ms | 0.00/s"
 statsHit.Parent = mainFrame
 
--- SINGLE TOGGLE BUTTON (controls BOTH)
+local hitCorner = Instance.new("UICorner")
+hitCorner.CornerRadius = UDim.new(0, 6)
+hitCorner.Parent = statsHit
+
+-- Main toggle button
 local autoBtn = Instance.new("TextButton")
-autoBtn.Size = UDim2.new(1, -20, 0, 70)
-autoBtn.Position = UDim2.new(0, 10, 0, 140)
+autoBtn.Size = UDim2.new(1, -12, 0, 44)
+autoBtn.Position = UDim2.new(0, 6, 0, 102)
 autoBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 90)
-autoBtn.TextColor3 = Color3.new(1,1,1)
-autoBtn.TextScaled = true
+autoBtn.TextColor3 = Color3.new(1, 1, 1)
+autoBtn.TextSize = 15
 autoBtn.Font = Enum.Font.GothamBlack
-autoBtn.Text = "START BOTH AUTOS"
+autoBtn.Text = "START BOTH"
+autoBtn.AutoButtonColor = true
 autoBtn.Parent = mainFrame
 
--- Destroy Button
+local autoCorner = Instance.new("UICorner")
+autoCorner.CornerRadius = UDim.new(0, 8)
+autoCorner.Parent = autoBtn
+
+-- Destroy button kept compact
 local destroyBtn = Instance.new("TextButton")
-destroyBtn.Size = UDim2.new(1, -20, 0, 50)
-destroyBtn.Position = UDim2.new(0, 10, 0, 230)
-destroyBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
-destroyBtn.TextColor3 = Color3.new(1,1,1)
-destroyBtn.TextScaled = true
+destroyBtn.Size = UDim2.new(1, -12, 0, 34)
+destroyBtn.Position = UDim2.new(0, 6, 0, 154)
+destroyBtn.BackgroundColor3 = Color3.fromRGB(150, 35, 35)
+destroyBtn.TextColor3 = Color3.new(1, 1, 1)
+destroyBtn.TextSize = 12
 destroyBtn.Text = "DESTROY GUI"
 destroyBtn.Font = Enum.Font.GothamBold
+destroyBtn.AutoButtonColor = true
 destroyBtn.Parent = mainFrame
+
+local destroyCorner = Instance.new("UICorner")
+destroyCorner.CornerRadius = UDim.new(0, 7)
+destroyCorner.Parent = destroyBtn
+
+-- Tiny floating restore button shown while GUI is hidden
+local showBtn = Instance.new("TextButton")
+showBtn.Name = "ShowButton"
+showBtn.Size = UDim2.new(0, 46, 0, 46)
+showBtn.Position = UDim2.new(1, -58, 0.5, -23)
+showBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+showBtn.TextColor3 = Color3.new(1, 1, 1)
+showBtn.Text = "🔥"
+showBtn.TextSize = 22
+showBtn.Font = Enum.Font.GothamBold
+showBtn.Visible = false
+showBtn.Active = true
+showBtn.AutoButtonColor = true
+showBtn.Parent = ScreenGui
+
+local showCorner = Instance.new("UICorner")
+showCorner.CornerRadius = UDim.new(1, 0)
+showCorner.Parent = showBtn
+
+-- Mouse + touch dragging
+local function makeDraggable(target, handle)
+    local dragging = false
+    local dragInput
+    local dragStart
+    local startPos
+
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = target.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    handle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input == dragInput then
+            local delta = input.Position - dragStart
+            target.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+
+makeDraggable(mainFrame, header)
+makeDraggable(showBtn, showBtn)
+
+hideBtn.Activated:Connect(function()
+    mainFrame.Visible = false
+    showBtn.Visible = true
+end)
+
+showBtn.Activated:Connect(function()
+    showBtn.Visible = false
+    mainFrame.Visible = true
+end)
 
 -- Shared findDummy
 local function findDummy()
@@ -147,7 +277,7 @@ local SAFETY_MS_FIRE, MIN_GAP_FIRE, OUTLIER_RESET_FIRE = 0.035, 1.260, 1.360
 
 local function updateStatsFire()
     local rate = cooldownEstFire > 0 and (1 / cooldownEstFire) or 0
-    statsFireball.Text = string.format("Fireballs: %d | Est: %d ms | Rate: %.2f hps", hitCountFire, math.round(cooldownEstFire * 1000), rate)
+    statsFireball.Text = string.format("Fire: %d | %d ms | %.2f/s", hitCountFire, math.round(cooldownEstFire * 1000), rate)
 end
 
 -- ==================== HIT LOGIC ====================
@@ -160,7 +290,7 @@ local SAFETY_MS_HIT, MIN_GAP_HIT, OUTLIER_RESET_HIT = 0.012, 0.600, 0.650
 
 local function updateStatsHit()
     local rate = cooldownEstHit > 0 and (1 / cooldownEstHit) or 0
-    statsHit.Text = string.format("Hits: %d | Est: %d ms | Rate: %.2f hps", hitCountHit, math.round(cooldownEstHit * 1000), rate)
+    statsHit.Text = string.format("Hits: %d | %d ms | %.2f/s", hitCountHit, math.round(cooldownEstHit * 1000), rate)
 end
 
 -- SINGLE TOGGLE FUNCTION (starts/stops BOTH)
@@ -196,7 +326,7 @@ local function toggleBoth()
             runningHit = false
         end
 
-        autoBtn.Text = "STOP BOTH AUTOS"
+        autoBtn.Text = "STOP BOTH"
         autoBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
 
         -- Fireball Loop
@@ -275,22 +405,25 @@ local function toggleBoth()
     else  -- Stop both
         runningFireball = false
         runningHit = false
-        autoBtn.Text = "START BOTH AUTOS"
+        autoBtn.Text = "START BOTH"
         autoBtn.BackgroundColor3 = Color3.fromRGB(40, 180, 90)
         if connFireball then connFireball:Disconnect() end
         if connHit then connHit:Disconnect() end
     end
 end
 
-autoBtn.MouseButton1Click:Connect(toggleBoth)
+autoBtn.Activated:Connect(toggleBoth)
 
-destroyBtn.MouseButton1Click:Connect(function()
+local function destroyGui()
     runningFireball = false
     runningHit = false
     if connFireball then connFireball:Disconnect() end
     if connHit then connHit:Disconnect() end
     ScreenGui:Destroy()
     print("Combined GUI destroyed")
-end)
+end
+
+destroyBtn.Activated:Connect(destroyGui)
+closeBtn.Activated:Connect(destroyGui)
 
 print("Combined SINGLE-BUTTON auto loaded – Drag GUI, click START BOTH!")
